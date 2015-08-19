@@ -123,3 +123,87 @@ function Get-OneDriveNavPane {
     }
     Remove-PSDrive -Name HKCR
 }
+
+function Enable-SnapFill {
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' | ForEach-Object {
+        if (-not (Test-Path -Path $_)) {
+            $null = New-Item -Path $_ -ItemType RegistryKey
+        }
+        if (-not (Get-ItemProperty -Path $_ -Name SnapFill -ErrorAction SilentlyContinue)) {
+            New-ItemProperty -Path $_ -Name SnapFill -PropertyType DWord -Value 1
+        } else {
+            Set-ItemProperty -Path $_ -Name SnapFill -Value 1
+        }
+    }
+}
+
+function Disable-SnapFill {
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' | ForEach-Object {
+        if (-not (Test-Path -Path $_)) {
+            $null = New-Item -Path $_ -ItemType RegistryKey
+        }
+        if (-not (Get-ItemProperty -Path $_ -Name SnapFill -ErrorAction SilentlyContinue)) {
+            New-ItemProperty -Path $_ -Name SnapFill -PropertyType DWord -Value 0
+        } else {
+            Set-ItemProperty -Path $_ -Name SnapFill -Value 0
+        }
+    }
+}
+
+function Get-SnapFill {
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' | ForEach-Object {
+        $HashTable = @{
+            Name = if ($_ -match 'HKLM:') {'LocalMachine'} else {'CurrentUser'}
+            FullPath = $_
+        }
+        try {
+            $HashTable.SnapFillEnabled = [bool](Get-ItemPropertyValue -Path $_ -Name SnapFill -ErrorAction Stop)
+        } catch {
+            $HashTable.SnapFillEnabled = $false
+        } finally {
+            New-Object -TypeName PSCustomObject -Property $HashTable
+        }
+    }
+}
+
+function Enable-SnapAssist {
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' | ForEach-Object {
+        if (-not (Test-Path -Path $_)) {
+            $null = New-Item -Path $_ -ItemType RegistryKey
+        }
+        if (-not (Get-ItemProperty -Path $_ -Name SnapAssist -ErrorAction SilentlyContinue)) {
+            New-ItemProperty -Path $_ -Name SnapAssist -PropertyType DWord -Value 1
+        } else {
+            Set-ItemProperty -Path $_ -Name SnapAssist -Value 1
+        }
+    }
+}
+
+function Disable-SnapAssist {
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' | ForEach-Object {
+        if (-not (Test-Path -Path $_)) {
+            $null = New-Item -Path $_ -ItemType RegistryKey
+        }
+        if (-not (Get-ItemProperty -Path $_ -Name SnapAssist -ErrorAction SilentlyContinue)) {
+            New-ItemProperty -Path $_ -Name SnapAssist -PropertyType DWord -Value 0
+        } else {
+            Set-ItemProperty -Path $_ -Name SnapAssist -Value 0
+        }
+    }
+}
+
+function Get-SnapAssist {
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' | ForEach-Object {
+        $HashTable = @{
+            Name = if ($_ -match 'HKLM:') {'LocalMachine'} else {'CurrentUser'}
+            FullPath = $_
+        }
+        try {
+            $HashTable.SnapAssistEnabled = [bool](Get-ItemPropertyValue -Path $_ -Name SnapAssist -ErrorAction Stop)
+        } catch {
+            $HashTable.SnapAssistEnabled = $false
+        } finally {
+            New-Object -TypeName PSCustomObject -Property $HashTable
+        }
+    }
+}
