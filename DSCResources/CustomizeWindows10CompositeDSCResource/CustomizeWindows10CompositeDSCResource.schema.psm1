@@ -1,13 +1,21 @@
 Configuration CustomizeWindows10CompositeDSCResource {
 Param(
 
-$EnableWin10ConnectedStandby = $true,
-$EnablePowerShellOnWinX = $true,
-$EnableSnapFill = $false,
-$EnableSnapAssist = $false,
-$ShowFileExtensions,
-$ShowHiddenFiles = $false,
-$ShowProtectedOSFiles = $false
+		$EnableWin10ConnectedStandby = $true,
+		$EnablePowerShellOnWinX = $true,
+		$EnableSnapFill = $false,
+		$EnableSnapAssist = $false,
+		$ShowFileExtensions,
+		$ShowHiddenFiles = $false,
+		$ShowProtectedOSFiles = $false,
+		$ShowDesktopIcons = $true,
+		$UserCredentials,
+		[ValidateSet("Notify","Automatic")]
+		[System.String]
+		$WindowsUpdateMode = "AllowUserConfig",
+		[ValidateSet("True","False")]
+		[System.String]
+        $EnableDriverInstallationFromWindowsUpdate = $true
 
 )
 
@@ -34,11 +42,12 @@ $false {$DontUSePowerShellOnWinXValue = '1'}
 
 }
 
-Registry DontUSePowerShellOnWinX {
+Registry DontUsePowerShellOnWinX {
         Key = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
         ValueName = 'DontUSePowerShellOnWinX'
         ValueData = $DontUSePowerShellOnWinXValue
         ValueType = 'dword'
+        PSDSCRunAsCredential = $UserCredentials
 
 }
 
@@ -54,7 +63,7 @@ Registry SnapFill {
         ValueName = 'SnapFill'
         ValueData = $EnableSnapFillValue
         ValueType = 'dword'
-
+        PSDSCRunAsCredential = $UserCredentials
 }
 
 switch ($EnableSnapAssist) {
@@ -69,7 +78,7 @@ Registry SnapAssist {
         ValueName = 'SnapAssist'
         ValueData = $EnableSnapAssistValue
         ValueType = 'dword'
-
+        PSDSCRunAsCredential = $UserCredentials
 }
 
 
@@ -85,6 +94,7 @@ Registry ShowFileExtensions {
         ValueName = 'HideFileExt'
         ValueData = $ShowFileExtensionsValue
         ValueType = 'dword'
+        PSDSCRunAsCredential = $UserCredentials
 
 }
 
@@ -100,6 +110,7 @@ Registry ShowHiddenFiles {
         ValueName = 'Hidden'
         ValueData = $ShowHiddenFilesValue
         ValueType = 'dword'
+        PSDSCRunAsCredential = $UserCredentials
 
 }
 
@@ -115,7 +126,66 @@ Registry ShowProtectedOSFiles {
         ValueName = 'ShowSuperHidden'
         ValueData = $ShowProtectedOSFilesValue
         ValueType = 'dword'
+        PSDSCRunAsCredential = $UserCredentials
 
 }
+
+switch ($ShowDesktopIcons) {
+
+$true {$ShowDesktopIconsValue = '0'}
+$false {$ShowDesktopIconsValue = '1'}
+
+}
+
+Registry ShowDesktopIcons {
+        Key = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+        ValueName = 'HideIcons'
+        ValueData = $ShowDesktopIconsValue
+        ValueType = 'dword'
+        PSDSCRunAsCredential = $UserCredentials
+
+}
+
+
+Switch ($WindowsUpdateMode) {
+        "Notify" {$WUOption = "1"}
+        "Automatic" {$WUOption = "0"}
+}
+
+
+Registry WindowsUpdateMode {
+        Key = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
+        ValueName = 'UxOption'
+        ValueData = $WUOption
+        ValueType = 'dword'
+
+}
+
+
+Switch ($EnableDriverInstallationFromWindowsUpdate) {
+        $true {$WUDriverOption = '1'}
+        $false {$WUDriverOption = '0'}
+}
+
+
+Registry WindowsUpdateDriverSetting01 {
+        Key = 'HKLM:\SOFTWARE\MICROSOFT\Windows\CurrentVersion\DriverSearching'
+        ValueName = 'SearchOrderConfig'
+        ValueData = $WUDriverOption
+        ValueType = 'dword'
+
+}
+
+Registry WindowsUpdateDriverSetting02 {
+        Key = 'HKLM:\SOFTWARE\MICROSOFT\Windows\CurrentVersion\Device Metadata'
+        ValueName = 'PreventDeviceMetadataFromNetwork'
+        ValueData = $WUDriverOption
+        ValueType = 'dword'
+
+}
+
+
+
+
 
 }
